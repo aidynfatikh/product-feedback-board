@@ -1,6 +1,5 @@
 import './App.css'
 import FeedbackForm from './FeedbackForm'
-import FeedbackList from './FeedbackList'
 
 function App() {
 
