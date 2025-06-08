@@ -7,7 +7,9 @@ export type FeedbackItem = {
     rating: number;
     createdAt: string;
     likes: number;
-};
+    isMine: boolean; 
+  };
+  
 
 type FeedbackStore = {
     feedbacks: FeedbackItem[];
@@ -15,6 +17,8 @@ type FeedbackStore = {
     addFeedback: (feedback: FeedbackItem) => void;
     likeFeedback: (id: number) => void;
     deleteFeedback: (id: number) => void;
+    updateFeedback: (id: number, updatedText: string, updatedRating: number) => void;
+      
 };
 
 export const useFeedbackStore = create<FeedbackStore>()(
@@ -23,9 +27,11 @@ export const useFeedbackStore = create<FeedbackStore>()(
             feedbacks: [],
             likedIds: [],
             dislikedIds: [],
-            addFeedback: (feedback) =>
-                set((state) => ({ feedbacks: [...state.feedbacks, feedback] })),
-
+            addFeedback: (feedback) => {
+                set((state) => ({
+                  feedbacks: [...state.feedbacks, { ...feedback, isMine: true }],
+                }))
+            },
             likeFeedback: (id) => {
                 const { likedIds, feedbacks } = get();
                 if (likedIds.includes(id)) {
@@ -50,6 +56,13 @@ export const useFeedbackStore = create<FeedbackStore>()(
                 set((state) => ({
                     feedbacks: state.feedbacks.filter((item) => item.id !== id),
                     likedIds: state.likedIds.filter((likedId) => likedId !== id),
+                }))
+            },
+            updateFeedback: (id, updatedText, updatedRating) => {
+                set((state) => ({
+                  feedbacks: state.feedbacks.map((item) =>
+                    item.id === id ? { ...item, feedback: updatedText, rating: updatedRating } : item
+                  ),
                 }))
             },
         }),

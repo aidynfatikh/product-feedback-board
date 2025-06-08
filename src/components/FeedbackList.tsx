@@ -1,48 +1,53 @@
+import { useState } from "react";
 import { useFeedbackStore } from "./types";
-import { X } from "lucide-react"; // You can install lucide-react or use any icon library
+import EditModal from "./EditModal";
 
 export default function FeedbackList() {
-    const feedbackItems = useFeedbackStore((state) => state.feedbacks);
-    const likeFeedback = useFeedbackStore((state) => state.likeFeedback);
-    const deleteFeedback = useFeedbackStore((state) => state.deleteFeedback); // You’ll define this
+  const feedbackItems = useFeedbackStore((state) => state.feedbacks);
+  const likeFeedback = useFeedbackStore((state) => state.likeFeedback);
+  const [editingItem, setEditingItem] = useState<null | any>(null);
 
-    if (feedbackItems.length === 0) {
-        return <p className="text-gray-500 italic text-center mt-6">No feedback submitted yet.</p>;
-    }
+  if (feedbackItems.length === 0) {
+    return <p className="text-gray-500 italic">No feedback submitted yet.</p>;
+  }
 
-    return (
-        <ul className="space-y-6">
-            {feedbackItems.map((item) => (
-                <li
-                    key={item.id}
-                    className="relative p-5 border border-gray-200 rounded-xl bg-white shadow hover:shadow-md transition duration-200"
-                >
-                    {/* Delete button */}
-                    <button
-                        onClick={() => deleteFeedback(item.id)}
-                        className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition"
-                        aria-label="Delete"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
+  return (
+    <>
+      <ul className="space-y-4">
+        {feedbackItems.map((item) => (
+          <li
+            key={item.id}
+            className="relative p-4 border border-gray-200 rounded-lg bg-gray-50 shadow-sm"
+          >
+            {item.isMine && (
+              <button
+                onClick={() => setEditingItem(item)}
+                className="absolute top-2 right-2 text-xs text-blue-600 hover:underline"
+              >
+                Edit
+              </button>
+            )}
+            <p className="text-gray-800 font-medium">{item.feedback}</p>
+            <p className="text-sm text-gray-600 mt-1">
+              ⭐ Rating: <span className="font-semibold">{item.rating}/5</span> —{" "}
+              {new Date(item.createdAt).toLocaleString()}
+            </p>
+            <div className="flex items-center gap-4 mt-3 text-sm text-gray-700">
+              <div>👍 {item.likes}</div>
+            </div>
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={() => likeFeedback(item.id)}
+                className="px-3 py-1 rounded bg-green-500 hover:bg-green-600 text-white text-sm"
+              >
+                Like
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
 
-                    <p className="text-lg text-gray-800 font-semibold">{item.feedback}</p>
-                    <p className="text-sm text-gray-600 mt-1">
-                        ⭐ Rating: <span className="font-medium">{item.rating}/5</span> —{" "}
-                        {new Date(item.createdAt).toLocaleString()}
-                    </p>
-
-                    <div className="flex items-center justify-between mt-4">
-                        <span className="text-sm text-gray-700">👍 {item.likes} Likes</span>
-                        <button
-                            onClick={() => likeFeedback(item.id)}
-                            className="px-4 py-1 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition"
-                        >
-                            Like
-                        </button>
-                    </div>
-                </li>
-            ))}
-        </ul>
-    );
+      {editingItem && <EditModal item={editingItem} onClose={() => setEditingItem(null)} />}
+    </>
+  );
 }

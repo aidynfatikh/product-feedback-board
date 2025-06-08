@@ -22,6 +22,7 @@ export default function FeedbackForm() {
             rating: selectedRating,
             createdAt: new Date().toISOString(),
             likes: 0,
+            isMine: true,
         };
 
         addFeedback(newFeedback);
