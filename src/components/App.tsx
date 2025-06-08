@@ -1,11 +1,14 @@
 import './App.css'
 import FeedbackForm from './FeedbackForm'
+import FeedbackList from './FeedbackList'
 
 function App() {
 
   return (
     <>
-      <FeedbackForm />
+      <div className="mt-10">
+        <FeedbackForm />
+      </div>
     </>
   )
 }

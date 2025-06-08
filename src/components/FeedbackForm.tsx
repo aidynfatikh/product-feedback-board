@@ -1,29 +1,31 @@
 import { useState } from "react";
-import type { FeedbackItem } from "./types";
+import { useFeedbackStore } from "./types";
 import FeedbackList from "./FeedbackList";
 
 export default function FeedbackForm() {
-    const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
+    const addFeedback = useFeedbackStore((state) => state.addFeedback);
+    const [selectedRating, setSelectedRating] = useState<number | null>(null);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.target as HTMLFormElement);
         const feedback = formData.get("feedback") as string;
-        const rating = Number(formData.get("rating"));
 
-        if (!feedback.trim() || isNaN(rating) || rating < 1 || rating > 5) {
-            alert("Please enter valid feedback and a rating between 1 and 5.");
+        if (!feedback.trim() || selectedRating === null) {
+            alert("Please enter valid feedback and select a rating.");
             return;
         }
 
-        const newFeedback: FeedbackItem = {
-            id: feedbacks.length + 1,
+        const newFeedback = {
+            id: Date.now(),
             feedback,
-            rating,
+            rating: selectedRating,
             createdAt: new Date().toISOString(),
+            likes: 0,
         };
 
-        setFeedbacks([...feedbacks, newFeedback]);
+        addFeedback(newFeedback);
+        setSelectedRating(null);
         (e.target as HTMLFormElement).reset();
     };
 
@@ -46,20 +48,26 @@ export default function FeedbackForm() {
                 </div>
 
                 <div>
-                    <label htmlFor="rating" className="block text-gray-700 font-medium mb-1">
-                        Rating (1–5)
-                    </label>
-                    <input
-                        type="number"
-                        id="rating"
-                        name="rating"
-                        min={1}
-                        max={5}
-                        required
-                        className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Rate from 1 to 5"
-                    />
+                    <label className="block text-gray-700 font-medium mb-1 text-center">Rating</label>
+                    <div className="flex justify-center gap-2">
+                        {[1, 2, 3, 4, 5].map((value) => (
+                            <button
+                                key={value}
+                                type="button"
+                                onClick={() => setSelectedRating(value)}
+                                className={`w-10 h-10 flex items-center justify-center rounded-full border-2 transition ${
+                                    selectedRating === value
+                                        ? "bg-blue-600 text-white border-blue-600"
+                                        : "bg-white text-gray-700 border-gray-300 hover:bg-blue-100"
+                                }`}
+                                aria-label={`Rate ${value}`}
+                            >
+                                {value}
+                            </button>
+                        ))}
+                    </div>
                 </div>
+
 
                 <div className="text-center">
                     <button
@@ -73,7 +81,7 @@ export default function FeedbackForm() {
 
             <div className="mt-10">
                 <h2 className="text-2xl font-semibold mb-4 text-gray-800">📋 Submitted Feedback</h2>
-                <FeedbackList feedbackItems={feedbacks} />
+                <FeedbackList />
             </div>
         </div>
     );
